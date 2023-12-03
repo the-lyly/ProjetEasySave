@@ -1,9 +1,14 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net.NetworkInformation;
 using System.Text;
-using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Xml;
+using System.Linq;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Dynamic;
+using static System.TimeZoneInfo;
 
 namespace LeProjet
 {
@@ -13,6 +18,8 @@ namespace LeProjet
         public int NbTravaux;
         public List<travail> ListeTravaux;
         public char Action;
+        public Log log=new  Log();
+        public LogFile logFile;
 
         public void SelectionLangue(char L)
         {
@@ -32,72 +39,96 @@ namespace LeProjet
         }
         public void SaveC(string source, string destination)
         {
-            foreach (var travailObj in ListeTravaux)
+            try
             {
-                try
+                if (!Directory.Exists(source))
                 {
-                    if (!Directory.Exists(source))
+                    if (Langue == 'F')
                     {
                         Console.WriteLine("Le dossier source n'existe pas : {0} \n", source);
-                        return;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Source repository does not exist : {0} \n", source);
                     }
 
-                    if (!Directory.Exists(destination))
+                    return;
+                }
+
+                if (!Directory.Exists(destination))
+                {
+                    if (Langue == 'F')
                     {
                         Console.WriteLine("Le dossier destination n'existe pas : {0} \n", destination);
-                        return;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Destination repository does not exist : {0} \n", destination);
                     }
 
-                    CopyDirectory(source, destination);
-
-                    Console.WriteLine("Sauvegarde complète terminée.\n");
-
-                    int nbfichier = travailObj.CountFiles();
-                    Console.WriteLine($"le nombre de fichiers est : {nbfichier}");
-
-                    long tailleFichiers = travailObj.getSize();
-                    Console.WriteLine($"La taille totale des fichiers est : {tailleFichiers} octets");
+                    return;
                 }
-                catch (Exception ex)
+
+                CopyDirectory(source, destination);
+                if (Langue == 'F')
+                {
+                    Console.WriteLine("Sauvegarde complète terminée.\n");
+                }
+
+                else
+                {
+                    Console.WriteLine("Complete Backup Completed.\n");
+                }
+
+                
+                travail travailObj = new travail(); 
+                TimeSpan transitionTime = new TimeSpan(); 
+                int fileSize = 0; 
+                log.Create_Log(travailObj, new FileInfo(destination), transitionTime, fileSize, "Complete");
+            }
+            catch (Exception ex)
+            {
+                if (Langue == 'F')
                 {
                     Console.WriteLine("Erreur lors de la sauvegarde complète : {0}\n", ex.Message);
                 }
-
-
+                else
+                {
+                    Console.WriteLine("Error occurred during complete backup : {0}\n", ex.Message);
+                }
             }
-         }
+        }
 
 
 
         private void CopyDirectory(string source, string destination)
         {
-            
-            
-                string[] files = Directory.GetFiles(source, "*.*", SearchOption.AllDirectories);
 
-                foreach (string file in files)
+            string[] files = Directory.GetFiles(source, "*.*", SearchOption.AllDirectories);
+
+            foreach (string file in files)
+            {
+
+                string relativePath = Path.GetRelativePath(source, file);
+                string destinationFile = Path.Combine(destination, relativePath);
+
+
+                Directory.CreateDirectory(Path.GetDirectoryName(destinationFile));
+
+                if(Langue=='F')
                 {
-
-                    string relativePath = Path.GetRelativePath(source, file);
-                    string destinationFile = Path.Combine(destination, relativePath);
-
-
-                    Directory.CreateDirectory(Path.GetDirectoryName(destinationFile));
-
-
-                    Console.WriteLine("Copie du fichier : {0}", file);
-                    File.Copy(file, destinationFile, true);
-
-
+                    Console.WriteLine("Copie du fichier : {0}\n", file);
+                }else 
+                {
+                    Console.WriteLine("Copying File : {0}\n", file);
                 }
-
                 
-            
-
+                File.Copy(file, destinationFile, true);
+            }
         }
 
 
-        //methode pour copie differentielle
+        //methode pour copie differenciel
         public void SaveD(string source, string destination)
         {
             try
@@ -118,36 +149,77 @@ namespace LeProjet
 
                 foreach (string file in files)
                 {
-
                     string relativePath = Path.GetRelativePath(source, file);
                     string destinationFile = Path.Combine(destination, relativePath);
 
                     if (!File.Exists(destinationFile) || File.GetLastWriteTimeUtc(file) > File.GetLastWriteTimeUtc(destinationFile))
                     {
-                        Console.WriteLine("Copie du fichier : {0} \n", file);
-                        File.Copy(file, destinationFile, true);
-                    }
+                        if (Langue == 'F')
+                        {
+                            Console.WriteLine("Copie du fichier : {0} \n", file);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Copying file : {0} \n", file);
+                        }
 
+                        File.Copy(file, destinationFile, true);
+                        
+                        travail travailObj = new travail(); 
+                        TimeSpan transitionTime = new TimeSpan(); 
+                        int fileSize = 0; 
+                        log.Create_Log(travailObj, new FileInfo(destination), transitionTime, fileSize, "Differential");
+                    }
                     else
                     {
-                        Console.WriteLine("Le fichier existe déjà et est à jour : {0}\n", file);
+                        if (Langue == 'F')
+                        {
+                            Console.WriteLine("Le fichier existe déjà et est à jour : {0}\n", file);
+                        }
+                        else
+                        {
+                            Console.WriteLine("The file exists and is up to date : {0}\n", file);
+                        }
                     }
                 }
 
-                Console.WriteLine("Copie différentielle terminée.\n");
+                if (Langue == 'F')
+                {
+                    Console.WriteLine("Copie différentielle terminée.\n");
+                }
+                else
+                {
+                    Console.WriteLine("Differential Backup Complete.\n");
+                }
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Erreur lors de la copie différentielle : {0}\n", ex.Message);
+                if (Langue == 'F')
+                {
+                    Console.WriteLine("Erreur lors de la copie différentielle : {0}\n", ex.Message);
+                }
+                else
+                {
+                    Console.WriteLine("Error during Differential Save : {0}\n", ex.Message);
+                }
             }
-            Console.WriteLine("Sauvegarde différentielle de {0} vers {1} reussi\n", source, destination);
-        }
 
+            if (Langue == 'F')
+            {
+                Console.WriteLine("Sauvegarde différentielle de {0} vers {1} reussi\n", source, destination);
+            }
+            else
+            {
+                Console.WriteLine("Differential Backup from {0} to {1} Successful\n", source, destination);
+            }
+        }
 
     }
 
+
     public class travail
     {
+        Main main=new Main();
         public string Nom { get; set; }
         public char Type { get; set; }
         public string EmplacementSource { get; set; }
@@ -169,131 +241,57 @@ namespace LeProjet
 
         public void AfficherDetails()
         {
-            Console.WriteLine($"ID: {ID}, Nom: {Nom}, Type: {Type}, EmplacementSource: {EmplacementSource}, Destination: {Destination}");
-        }
-
-         public int CountFiles ()
-        {
-                    string[] fichiers = Directory.GetFiles(EmplacementSource);
-                    Console.WriteLine($"le nombre de fichiers dans le dossier {EmplacementSource}: est {fichiers.Length}");
-                    return fichiers.Length;
-
-
-        }
-        public long getSize()
-        {
-            long totalSize = 0;
-
-            try
+            if (main.Langue == 'F') 
             {
-                string[] files = Directory.GetFiles(EmplacementSource, "*.*", SearchOption.AllDirectories);
-
-                foreach (string file in files)
-                {
-                    FileInfo fileInfo = new FileInfo(file);
-                    totalSize += fileInfo.Length;
-                }
-
-                Console.WriteLine($"La taille totale des fichiers dans le dossier {EmplacementSource}: est {totalSize} octets");
+                Console.WriteLine($"ID: {ID}, Nom: {Nom}, Type: {Type}, EmplacementSource: {EmplacementSource}, Destination: {Destination}");
             }
-            catch (Exception ex)
+            else
             {
-                Console.WriteLine($"Erreur lors du calcul de la taille des fichiers : {ex.Message}");
+                Console.WriteLine($"ID: {ID}, Name: {Nom}, Type: {Type}, Source: {EmplacementSource}, Destination: {Destination}");
             }
 
-            return totalSize;
-
         }
-
     }
 
-
-    // modification lynda
-
-    public class State
+    public class LogFile
     {
-        public DateTime datetime { get; set; }
-        public string pathdufichierstate { get; set; }
-        public travail state { get; set; }
+        public static string FilePath = "D:\\Local Disk E_6420211819\\Downloads\\LOTR\\EasySaveLogs\\Log.json";
+
         public string Name { get; set; }
-        public string TotalFilesToCopy { get; set; }
-        public string TotalFilesSize { get; set; }
-        public int NbFilesLeftToDo { get; set; }
-        public string State {  get; set; }
+        public string SourceFilePath { get; set; }
+        public string TargetFilePath { get; set; }
+        public string Size { get; set; }
+        public string Time { get; set; }
+        public string TransitionTime { get; set; }
+        public string LogType { get; set; }  
+    }
 
-        public int TFTC (String File)
+    public class Log
+    {
+        public void Create_Log(travail work, FileInfo fileInfo, TimeSpan transitionTime, int size, string logType)
         {
-            int tftc = File.Length; 
-
-            return (tftc);
-        }
-        public int TFS (int a, string File) // s'implemente dans la boucle de creation de travaux le a sera a l'exterieur de la boucle et s'incrementera a chaque intenerance
-        {
-            a = a + File.Length;
-            return (a);
-        }
-
-        public int filesLeft()
-       {
-            // Implémentez la logique pour retourner le nombre de fichiers restants
-            // en fonction de l'état du travail de sauvegarde.
-            // Vous pouvez utiliser les propriétés de la classe travail pour obtenir les informations nécessaires.
-        }
-
-        public long SizeLeft()
-       {
-            // Implémentez la logique pour retourner la taille des fichiers restants
-            // en fonction de l'état du travail de sauvegarde.
-        }
-
-
-
-        public void CreateStateFile()
-        {
-            string stateFilePath = "chemin_vers_le_fichier_etat"; // Remplacez par le chemin réel de votre fichier d'état
-
-            try
+            var time = new JProperty("Timestamp", DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss"));
+            var jsonDataWork = File.ReadAllText(LogFile.FilePath);
+            var logEntry = new LogFile
             {
-                // Créer un objet pour contenir les informations d'état
-                var stateObject = new
-                {
-                    DateHeure = datetime.ToString(),
-                    NomTravail = state.Nom,
-                    EtatTravail = state.Type,
-                 //   FichiersRestants = filesLeft(),
-                  //  TailleRestante = SizeLeft()
-                };
+                Name = work.Nom,
+                SourceFilePath = work.EmplacementSource + "\\" + fileInfo.Name,
+                TargetFilePath = work.Destination + "\\" + fileInfo.Name,
+                TransitionTime = Convert.ToString(transitionTime),
+                Size = Convert.ToString(size),
+                Time = Convert.ToString(time),
+                LogType = logType  
+            };
+            var logList = JsonConvert.DeserializeObject<List<LogFile>>(jsonDataWork) ?? new List<LogFile>();
+            logList.Add(logEntry);
 
-                // Convertir l'objet en une chaîne JSON
-                string jsonState = JsonSerializer.Serialize(stateObject);
+            string jsonString = JsonConvert.SerializeObject(logList, Newtonsoft.Json.Formatting.Indented);
+            File.WriteAllText(LogFile.FilePath, jsonString);
+        }
 
-                // Vérifier si le fichier d'état existe
-                if (File.Exists(stateFilePath))
-                {
-                    // Écraser le contenu existant avec les nouvelles informations JSON
-                    File.WriteAllText(stateFilePath, jsonState);
-
-                    Console.WriteLine("Fichier d'état mis à jour avec succès.");
-                }
-                else
-                {
-                    // Si le fichier n'existe pas, créer un nouveau fichier d'état
-                    using (StreamWriter sw = File.CreateText(stateFilePath))
-                    {
-                        // Écrire les informations JSON dans le fichier
-                        sw.Write(jsonState);
-                    }
-
-                    Console.WriteLine("Fichier d'état créé avec succès.");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Erreur lors de la création/mise à jour du fichier d'état : {ex.Message}");
-            }
-        }  
+        internal void Create_Log(object travailObject, FileInfo fileInfo, object transitionTime, object fileSize)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
-
-
-
