@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -16,8 +16,8 @@ namespace LeProjet
 
             do
             {
-                Console.WriteLine("Bienvenue sur EasySafe => veuillez sélectionner la langue que vous souhaitez utiliser." +
-                    "\n Tapez: \n F -> pour français. \n E -> pour anglais.");
+                Console.WriteLine("Bienvenue sur EasySave => Choisissez la langue.\n Welcome to EasySave, Select your language." +
+                    "\n Tapez: \n F -> pour Français. \n E -> for English.");
 
                 langage = char.ToUpper(Console.ReadLine()[0]);
             } while (langage != 'F' && langage != 'E');
@@ -42,13 +42,13 @@ namespace LeProjet
             {
                 if (Langue == 'F')
                 {
-                    Console.WriteLine("\n Veuillez sélectionner le nombre de travaux que vous souhaitez executer. \n REMARQUE: \n " +
-                        "Le nombre maximum de travaux que vous pouvez executer simultanemment ne peut dépasser 5 travaux!");
+                    Console.WriteLine("\n Veuillez sélectionner le nombre de travaux que vous souhaitez creer. \n REMARQUE: \n " +
+                        "Le nombre maximum de travaux que vous pouvez creer a la fois ne peut dépasser 5 travaux!");
                 }
                 else
                 {
-                    Console.WriteLine("\n Please select the number of tasks you want to execute. \n NOTE: \n " +
-                        "The maximum number of tasks you can execute simultaneously cannot exceed 5 tasks!");
+                    Console.WriteLine("\n Please select the number of tasks you want to Create. \n NOTE: \n " +
+                        "The maximum number of tasks you can create at a time cannot exceed 5 tasks!");
                 }
 
             } while (!int.TryParse(Console.ReadLine(), out Nb) || Nb <= 0 || Nb > 5);
@@ -56,7 +56,7 @@ namespace LeProjet
             return Nb;
         }
 
-        //methode pour romplir les valeurs des attribus des travaux une fois que monsieu saisie le nombre de taff qu'il veux créer
+        //methode pour remplir les valeurs des attribus des travaux une fois que monsieu saisie le nombre de taff qu'il veux créer
 
         public (string Name, char Type, string Emplacement, string Deplacement) ReadInputTravaux()
         {
@@ -85,7 +85,7 @@ namespace LeProjet
                 else if (Langue == 'E')
 
                 {
-                    Console.WriteLine("\n Please enter the type of copy, type C for complete and D for differential: \n ");
+                    Console.WriteLine("\n Please enter the backup type, C for complete and D for differential: \n ");
                 }
 
                 type = char.ToUpper(Console.ReadKey().KeyChar);
@@ -95,12 +95,12 @@ namespace LeProjet
             {
                 if (Langue == 'F')
                 {
-                    Console.WriteLine(" \n Veuillez saisir l'emplacement du travail. \n REMARQUE : cette commande se réexécutera" +
+                    Console.WriteLine(" \n Veuillez saisir l'emplacement source du travail. \n REMARQUE : cette commande se réexécutera" +
                         " tant que vous n'aurez pas saisi un emplacement déjà existant : \n ");
                 }
                 else if (Langue == 'E')
                 {
-                    Console.WriteLine(" \n Please enter the task location. \n NOTE: This command will run again" +
+                    Console.WriteLine(" \n Please enter the task source path. \n NOTE: This command will run again" +
                         " until you enter an existing location: \n ");
                 }
 
@@ -111,11 +111,11 @@ namespace LeProjet
             {
                 if (Langue == 'F')
                 {
-                    Console.WriteLine("\n Veuillez saisir le emplacement ou vous souhetez copier votre travail : \n");
+                    Console.WriteLine("\n Veuillez saisir la destination ou vous souhetez copier votre travail : \n");
                 }
                 else if (Langue == 'E')
                 {
-                    Console.WriteLine("\n Please enter the task displacement:\n ");
+                    Console.WriteLine("\n Please enter the task's destination :\n ");
                 }
 
                 deplacement = Console.ReadLine();
@@ -124,27 +124,35 @@ namespace LeProjet
             return (name, type, emplacement, deplacement);
         }
         
-        // la methode qui vient aprés que l'utilisateur ai rompli tout les travaux 
+        // la methode qui vient aprés que l'utilisateur ai rempli tout les travaux 
         public char ReadInputExecution()
         {
             char execution;
-            Console.WriteLine("il est maintenant temps de choisir les travaux que vous souhaitez executer \n ");
+            if (Langue == 'F') 
+            { 
+                Console.WriteLine("Choisissez les travaux que vous souhaitez executer \n ");
+            }
+            else 
+            {
+                Console.WriteLine("Choose the tasks you would like to run \n ");
+            }
+            
             do
             {
                 if (Langue == 'F')
                 {
                     Console.WriteLine("\n Voulez-vous exécuter une copie séquentielle ou une copie entière ? Vous pouvez également choisir d'exécuter qu'un seul travail." +
-                        " Tapez S pour séquentiel, E pour entier et U pour travail unique \n");
+                        " Tapez S pour séquentiel ou U pour travail unique \n");
                 }
                 else if (Langue == 'E')
                 {
-                    Console.WriteLine("\n Do you want to run a sequential copy or to run only one job." +
+                    Console.WriteLine("\n Do you want to run a sequential copy or run only one job." +
                         " Type S for sequential or U for single job \n");
                 }
 
                 execution = char.ToUpper(Console.ReadKey().KeyChar);
                 Console.WriteLine();
-            } while (execution != 'S' && execution != 'E' && execution != 'U');
+            } while (execution != 'S'  && execution != 'U');
 
             if (execution == 'U')
             {
@@ -179,11 +187,11 @@ namespace LeProjet
             int start;
             int end;
 
-            if (Langue == 'F')
+            if (Langue == 'E')
             {
-                Console.WriteLine("Enter a range of numbers in the format 'x-y':");
+                Console.WriteLine("Enter a range of numbers in this form 'x-y':");
             }
-            else if (Langue == 'E')
+            else if (Langue == 'F')
             {
                 Console.WriteLine("Veuillez entrer une plage de chiffres sous la forme 'x-y':");
             }
@@ -192,22 +200,22 @@ namespace LeProjet
 
             if (TryParseRange(input, out start, out end) && start > 0 && start < 6 && end > 0 && end < 6 && start < end)
             {
-                if (Langue == 'F')
+                if (Langue == 'E')
                 {
                     Console.WriteLine($"You entered the range: {start} - {end}");
                 }
-                else if (Langue == 'E')
+                else if (Langue == 'F')
                 {
                     Console.WriteLine($"Vous avez saisi la plage : {start} - {end}");
                 }
             }
             else
             {
-                if (Langue == 'F')
+                if (Langue == 'E')
                 {
-                    Console.WriteLine("The input is not valid.");
+                    Console.WriteLine("Invalid Input.");
                 }
-                else if (Langue == 'E')
+                else if (Langue == 'F')
                 {
                     Console.WriteLine("La saisie n'est pas valide.");
                 }
@@ -222,8 +230,14 @@ namespace LeProjet
         public List<int> ReadInputWorkSeparer()
         {
             List<int> workIDs = new List<int>();
-
-            Console.WriteLine("Entrez les ID des travaux que vous souhaitez exécuter sous la forme 'x,y,z':");
+            if (Langue == 'F')
+            {
+                Console.WriteLine("Entrez les ID des travaux que vous souhaitez exécuter sous la forme:'x,y,z':");
+            }else
+            {
+                Console.WriteLine("Enter the ID for the tasks you would like to run in this form : 'x,y,z':");
+            }
+               
             string input = Console.ReadLine();
 
             string[] idStrings = input.Split(',');
@@ -238,12 +252,27 @@ namespace LeProjet
                     }
                     else
                     {
-                        Console.WriteLine($"L'ID '{workID}' n'est pas valide et sera ignoré.");
+                        if (Langue == 'F')
+                        {
+                             Console.WriteLine($"L'ID '{workID}' n'est pas valide et sera ignoré.");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"The ID '{workID}' is invalid and will be ignored.");
+                        }
+
                     }
                 }
                 else
                 {
-                    Console.WriteLine($"'{idString}' n'est pas un nombre valide et sera ignoré.");
+                    if (Langue == 'F')
+                    {
+                        Console.WriteLine($"'{idString}' n'est pas un nombre valide et sera ignoré.");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"'{idString}' is not a valid number, will be ignored.");
+                    }
                 }
             }
 
@@ -255,7 +284,15 @@ namespace LeProjet
         {
             int taff;
             do {
-            Console.WriteLine("veuillez saisir le travail que vous souhetez executer. REMARQUE: cette action se repetera tant que vous n'aurez pas saisie un travail existant");
+                if(Langue=='F')
+                {
+                    Console.WriteLine("veuillez saisir le travail que vous souhaitez executer. REMARQUE: cette action se repetera tant que vous n'aurez pas saisie un travail existant");
+
+                }
+                else 
+                {  
+                    Console.WriteLine("please enter the job you wish to execute. NOTE: this action will be repeated until you enter an existing job.");
+                }
             } while (!int.TryParse(Console.ReadLine(), out taff) || taff <= 0 );
             return (taff);
         }
