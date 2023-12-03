@@ -215,6 +215,23 @@ namespace LeProjet
         public DateTime datetime { get; set; }
         public string pathdufichierstate { get; set; }
         public travail state { get; set; }
+        public string Name { get; set; }
+        public string TotalFilesToCopy { get; set; }
+        public string TotalFilesSize { get; set; }
+        public int NbFilesLeftToDo { get; set; }
+        public string State {  get; set; }
+
+        public int TFTC (String File)
+        {
+            int tftc = File.Length; 
+
+            return (tftc);
+        }
+        public int TFS (int a, string File) // s'implemente dans la boucle de creation de travaux le a sera a l'exterieur de la boucle et s'incrementera a chaque intenerance
+        {
+            a = a + File.Length;
+            return (a);
+        }
 
         public int filesLeft()
        {
