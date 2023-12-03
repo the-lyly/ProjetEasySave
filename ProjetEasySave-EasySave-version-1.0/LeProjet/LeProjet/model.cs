@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Dynamic;
 using static System.TimeZoneInfo;
-
+//installer le package newtonsoft.json
 namespace LeProjet
 {
     public class Main
@@ -38,7 +38,20 @@ namespace LeProjet
             return ListeTravaux.Find(travailObj => travailObj.ID == id);
         }
         public void SaveC(string source, string destination)
-        {
+        { StateController controller = new StateController();
+
+
+            controller.initState();
+
+
+                List<STATE> updatedStates = controller.AddState("Type", "Name", "SourceFile", "TargetFile",
+                "State", 5, 1024, 3, "InProgress");
+
+
+                controller.createState();
+
+
+                List<STATE> openedStates = controller.openState();
             try
             {
                 if (!Directory.Exists(source))
@@ -130,7 +143,20 @@ namespace LeProjet
 
         //methode pour copie differenciel
         public void SaveD(string source, string destination)
-        {
+        { StateController controller = new StateController();
+
+
+            controller.initState();
+
+
+            List<STATE> updatedStates = controller.AddState("Type", "Name", "SourceFile", "TargetFile",
+            "State", 5, 1024, 3, "InProgress");
+
+
+            controller.createState();
+
+
+            List<STATE> openedStates = controller.openState();
             try
             {
                 if (!Directory.Exists(source))
@@ -215,7 +241,109 @@ namespace LeProjet
         }
 
     }
+public class STATE
+{
 
+
+    public string type { get; set; }
+    public string name { get; set; }
+    public string sourceFilePath { get; set; }
+    public string targetFilePath { get; set; }
+    public string State { get; set; } //booleen d'état
+    public int numberOfFile { get; set; }
+    public long totalFileSize { get; set; }
+    public int numberOfFilesToDo { get; set; }
+    public string progressionState { get; set; }
+
+
+    public STATE()
+    {
+
+    }
+
+
+
+    public STATE(string type, string name, string sourceFilePath, string targetFilePath, string State, int nbFile, long totalFileSize, int nbFilesToDo, string progressionState)
+    {
+        this.type = type;
+        this.name = name;
+        this.sourceFilePath = sourceFilePath;
+        this.targetFilePath = targetFilePath;
+        this.State = State;
+        this.numberOfFile = nbFile;
+        this.totalFileSize = totalFileSize;
+        this.numberOfFilesToDo = nbFilesToDo;
+        this.progressionState = progressionState;
+    }
+
+
+
+}
+
+
+
+
+public class StateController
+{
+    List<STATE> states;
+    public StateController()
+    {
+
+        states = new List<STATE>();
+    }
+    //Return state path
+    public string pathFinder()
+    {
+
+        string pathApp = Directory.GetCurrentDirectory() + @"C:\Users\Nabilla\Desktop\States";
+        return pathApp;
+
+    }
+    // Check if state directory exists, if not create it 
+    public void initState()
+    {
+        if (!Directory.Exists(pathFinder()))
+        {
+            Directory.CreateDirectory(pathFinder());
+        }
+    }
+    public List<STATE> AddState(string type, string name, string sourceFilePath, string targetFilePath,
+        string State, int nbFile, long totalFileSize, int nbFilesToDo, string progressionState)
+    {
+        STATE model = new STATE(type, name, sourceFilePath, targetFilePath, State, nbFile, totalFileSize, nbFilesToDo, progressionState);
+        states.Add(model);
+        return states;
+    }
+
+    public void createState()
+    {
+        lock (states)
+        {
+            string pathFileName = pathFinder() + @"\State.json";
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            string json = JsonSerializer.Serialize(states, options);
+            File.WriteAllText(pathFileName, json);
+        }
+    }
+    // Convert the json state file to a list of objects
+    public List<STATE> openState()
+    {
+        lock (states)
+        {
+            string pathFileName = pathFinder() + @"\State.json";
+            using (StreamReader r = new StreamReader(pathFileName))
+            {
+                string jsonString = r.ReadToEnd();
+                var options = new JsonSerializerOptions { WriteIndented = true };
+                states = JsonSerializer.Deserialize<List<STATE>>(jsonString, options);
+                return states;
+            }
+        };
+
+    }
+
+
+}
 
     public class travail
     {
