@@ -24,56 +24,62 @@ namespace LeProjet
             MAIN.SelectionNbTravaux(VU.ReadInputNbTravaux());
         }
 
-        public void Travaux()
-        {
-            for (int i = 1; i <= MAIN.NbTravaux; i++)
-            {
-                travail Travail = new travail();
+         public void Travaux()
+ {
+     int a = 0;
+     for (int i = 1; i <= MAIN.NbTravaux; i++)
+     {
+         travail Travail = new travail();
 
-                if (MAIN.Langue == 'F')
-                {
-                    Console.WriteLine("Paramétrage du travail numéro : {0} \n", i);
-                }
-                else if (MAIN.Langue == 'E')
-                {
-                    Console.WriteLine("Setting up job number : {0} \n", i);
-                }
+         if (MAIN.Langue == 'F')
+         {
+             Console.WriteLine("Paramétrage du travail numéro : {0} \n", i);
+         }
+         else if (MAIN.Langue == 'E')
+         {
+             Console.WriteLine("Setting up job number : {0} \n", i);
+         }
 
-                var task = VU.ReadInputTravaux();
+         var task = VU.ReadInputTravaux();
 
-                Travail.MiseTravail(task.Name, task.Type, task.Emplacement, task.Deplacement);
+         Travail.MiseTravail(task.Name, task.Type, task.Emplacement, task.Deplacement);
 
-                Travail.IdentifiantTravail(i);
+         a = state.TFS(a, task.Emplacement);
 
-                MAIN.ListeTravaux.Add(Travail);
+         Travail.IdentifiantTravail(i);
 
-                Travail.AfficherDetails();
+         MAIN.ListeTravaux.Add(Travail);
 
-                if (MAIN.Langue == 'F')
-                {
-                    Console.WriteLine("\n suivant \n");
-                }
-                else if (MAIN.Langue == 'E')
-                {
-                    Console.WriteLine("\n next \n");
-                }
-            }
+         Travail.AfficherDetails();
 
-            if (MAIN.Langue == 'F')
-            {
-                Console.WriteLine(" \n Vos {0} ont bien été déclarés avec succès \n", MAIN.NbTravaux);
-            }
-            else
-            {
-                Console.WriteLine("\n Your {0} tasks have been successfully declared.\n", MAIN.NbTravaux);
-            }
+         if (MAIN.Langue == 'F')
+         {
+             Console.WriteLine("\n suivant \n");
+         }
+         else if (MAIN.Langue == 'E')
+         {
+             Console.WriteLine("\n next \n");
+         }
+     }
 
-            foreach (var travailObj in MAIN.ListeTravaux)
-            {
-                travailObj.AfficherDetails();
-            }
-        }
+     if (MAIN.Langue == 'F')
+     {
+         Console.WriteLine(" \n Vos {0} ont bien été déclarés avec succès \n", MAIN.NbTravaux);
+         Console.WriteLine("\n La taille de vos travaux est {0} :", a);
+     }
+     else
+     {
+         Console.WriteLine("\n Your {0} tasks have been successfully declared.\n", MAIN.NbTravaux);
+         Console.WriteLine("\n the total size of your tasks is {0} :", a);
 
+     }
+     MAIN.TotalSize = a;
+     foreach (var travailObj in MAIN.ListeTravaux)
+     {
+         travailObj.AfficherDetails();
+     }
+     
+ }
         public void Execution()
         {
             MAIN.Action = VU.ReadInputExecution();
