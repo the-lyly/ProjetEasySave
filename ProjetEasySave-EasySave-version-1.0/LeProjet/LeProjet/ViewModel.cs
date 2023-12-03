@@ -5,11 +5,13 @@ namespace LeProjet
 {
     class ViewModel
     {
+        STATE state = new STATE();
         view VU = new view();
         Main MAIN = new Main();
 
         public void Setting()
         {
+
             MAIN.SelectionLangue(VU.ReadInputLangage());
 
             if (MAIN.Langue == 'F')
@@ -26,6 +28,7 @@ namespace LeProjet
 
         public void Travaux()
         {
+            int a = 0;
             for (int i = 1; i <= MAIN.NbTravaux; i++)
             {
                 travail Travail = new travail();
@@ -42,6 +45,8 @@ namespace LeProjet
                 var task = VU.ReadInputTravaux();
 
                 Travail.MiseTravail(task.Name, task.Type, task.Emplacement, task.Deplacement);
+
+               a = state.TFS(a, task.Emplacement);
 
                 Travail.IdentifiantTravail(i);
 
@@ -62,18 +67,21 @@ namespace LeProjet
             if (MAIN.Langue == 'F')
             {
                 Console.WriteLine(" \n Vos {0} ont bien été déclarés avec succès \n", MAIN.NbTravaux);
+                Console.WriteLine("\n La taille de vos travaux est {0} :", a);
             }
             else
             {
-                Console.WriteLine("\n Your {0} tasks have been successfully Created.\n", MAIN.NbTravaux);
-            }
+                Console.WriteLine("\n Your {0} tasks have been successfully declared.\n", MAIN.NbTravaux);
+                Console.WriteLine("\n the total size of your tasks is {0} :", a);
 
+            }
+            MAIN.TotalSize = a;
             foreach (var travailObj in MAIN.ListeTravaux)
             {
                 travailObj.AfficherDetails();
             }
-        }
 
+        }
         public void Execution()
         {
             MAIN.Action = VU.ReadInputExecution();
