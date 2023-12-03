@@ -276,7 +276,17 @@ public class STATE
         this.progressionState = progressionState;
     }
 
+public int TFTC (String File)
+        {
+            int tftc = File.Length; 
 
+            return (tftc);
+        }
+        public int TFS (int a, string File) // s'implemente dans la boucle de creation de travaux le a sera a l'exterieur de la boucle et s'incrementera a chaque intenerance
+        {
+            a = a + File.Length;
+            return (a);
+        }
 
 }
 
