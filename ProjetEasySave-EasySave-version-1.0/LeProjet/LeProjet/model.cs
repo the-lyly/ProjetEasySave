@@ -20,6 +20,8 @@ namespace LeProjet
         public char Action;
         public Log log=new  Log();
         public LogFile logFile;
+        public int TotalSize;
+
 
         public void SelectionLangue(char L)
         {
@@ -52,7 +54,8 @@ namespace LeProjet
 
 
                 List<STATE> openedStates = controller.openState();
-            try
+         foreach (var travailObj in ListeTravaux) { 
+         try
             {
                 if (!Directory.Exists(source))
                 {
@@ -110,6 +113,13 @@ namespace LeProjet
                     Console.WriteLine("Error occurred during complete backup : {0}\n", ex.Message);
                 }
             }
+
+                    int nbfichier = travailObj.CountFiles();
+                    Console.WriteLine($"le nombre de fichiers est : {nbfichier}");
+
+                    long tailleFichiers = travailObj.getSize();
+                    Console.WriteLine($"La taille totale des fichiers est : {tailleFichiers} octets");
+             
         }
 
 
@@ -387,9 +397,40 @@ public class StateController
             {
                 Console.WriteLine($"ID: {ID}, Name: {Nom}, Type: {Type}, Source: {EmplacementSource}, Destination: {Destination}");
             }
-
         }
+ public int CountFiles ()
+{
+            string[] fichiers = Directory.GetFiles(EmplacementSource);
+            Console.WriteLine($"le nombre de fichiers dans le dossier {EmplacementSource}: est {fichiers.Length}");
+            return fichiers.Length;
+
+
+}
+public long getSize()
+{
+    long totalSize = 0;
+
+    try
+    {
+        string[] files = Directory.GetFiles(EmplacementSource, "*.*", SearchOption.AllDirectories);
+
+        foreach (string file in files)
+        {
+            FileInfo fileInfo = new FileInfo(file);
+            totalSize += fileInfo.Length;
+        }
+
+        Console.WriteLine($"La taille totale des fichiers dans le dossier {EmplacementSource}: est {totalSize} octets");
     }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Erreur lors du calcul de la taille des fichiers : {ex.Message}");
+    }
+
+    return totalSize;
+        
+    }
+        
 
     public class LogFile
     {
