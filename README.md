@@ -24,7 +24,9 @@ install-package Newtonsoft.Json
 ```
 
 open the solution explorer and click on the file "LeProjet.sln" and debbug it
-and here you go, you open the app Easy Save  
+and here you go, you opened the app Easy Save  
+
+
 
 *FR*
 extrayez sur votre ordinateur la branche de la version que vous souhaitez essayer :
@@ -38,7 +40,23 @@ vous devez installer un package nuget, allez dans Outils > gestionnaire de packa
 install-package Newtonsoft.Json
 ```
 ouvrez l'explorateur de solutions et cliquez sur le fichier "LeProjet.sln" et déboguez-le
-et voilà, vous ouvrez l'application Easy Save
+et voilà, vous avez ouvert l'application Easy Save
+
+
+-----------------------------------------------------------------------------------------------------
+  _____                  ____                    __     __            _               _   ___  
+ | ____|__ _ ___ _   _  / ___|  __ ___   _____  \ \   / /__ _ __ ___(_) ___  _ __   / | / _ \ 
+ |  _| / _` / __| | | | \___ \ / _` \ \ / / _ \  \ \ / / _ \ '__/ __| |/ _ \| '_ \  | || | | |
+ | |__| (_| \__ \ |_| |  ___) | (_| |\ V /  __/   \ V /  __/ |  \__ \ | (_) | | | | | || |_| |
+ |_____\__,_|___/\__, | |____/ \__,_| \_/ \___|    \_/ \___|_|  |___/_|\___/|_| |_| |_(_)___/ 
+                 |___/                                                                        
+
+  / ___|_ __ ___  _   _ _ __    / _ \/|  |\
+ | |  _| '__/ _ \| | | | '_ \  | | | ||__| |
+ | |_| | | | (_) | |_| | |_) | | |_| |___ ||
+  \____|_|  \___/ \__,_| .__/   \___/    ||/
+                       |_|  
+ ___________________________________________________________________________________________________
 
 
 ## Usage
