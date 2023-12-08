@@ -42,7 +42,7 @@ install-package Newtonsoft.Json
 ouvrez l'explorateur de solutions et cliquez sur le fichier "LeProjet.sln" et déboguez-le
 et voilà, vous avez ouvert l'application Easy Save
 
-
+```c#
 -----------------------------------------------------------------------------------------------------
   _____                  ____                    __     __            _               _   ___  
  | ____|__ _ ___ _   _  / ___|  __ ___   _____  \ \   / /__ _ __ ___(_) ___  _ __   / | / _ \ 
@@ -57,7 +57,7 @@ et voilà, vous avez ouvert l'application Easy Save
   \____|_|  \___/ \__,_| .__/   \___/    ||/
                        |_|  
  ___________________________________________________________________________________________________
-
+``` 
 
 ## Usage
 
