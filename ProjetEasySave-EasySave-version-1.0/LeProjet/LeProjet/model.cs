@@ -9,6 +9,10 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Dynamic;
 using static System.TimeZoneInfo;
+using System.Xml.Serialization;
+using System.Drawing;
+using System.Reflection;
+using System.Text.Json;
 //installer le package newtonsoft.json
 namespace LeProjet
 {
@@ -18,9 +22,10 @@ namespace LeProjet
         public int NbTravaux;
         public List<travail> ListeTravaux;
         public char Action;
-        public Log log=new  Log();
+        public Log log = new Log();
         public LogFile logFile;
         public int TotalSize;
+        
 
 
         public void SelectionLangue(char L)
@@ -40,90 +45,91 @@ namespace LeProjet
             return ListeTravaux.Find(travailObj => travailObj.ID == id);
         }
         public void SaveC(string source, string destination)
-        { StateController controller = new StateController();
+        {
+            StateController controller = new StateController();
 
 
             controller.initState();
 
 
-                List<STATE> updatedStates = controller.AddState("Type", "Name", "SourceFile", "TargetFile",
-                "State", 5, 1024, 3, "InProgress");
+            List<STATE> updatedStates = controller.AddState("Type", "Name", "SourceFile", "TargetFile",
+            "State", 5, 1024, 3, "InProgress");
 
 
-                controller.createState();
+            controller.createState();
 
 
-                List<STATE> openedStates = controller.openState();
-         foreach (var travailObj in ListeTravaux) { 
-         try
+            List<STATE> openedStates = controller.openState();
+            foreach (var travailObj in ListeTravaux)
             {
-                if (!Directory.Exists(source))
+                try
+                {
+                    if (!Directory.Exists(source))
+                    {
+                        if (Langue == 'F')
+                        {
+                            Console.WriteLine("Le dossier source n'existe pas : {0} \n", source);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Source repository does not exist : {0} \n", source);
+                        }
+
+                        return;
+                    }
+
+                    if (!Directory.Exists(destination))
+                    {
+                        if (Langue == 'F')
+                        {
+                            Console.WriteLine("Le dossier destination n'existe pas : {0} \n", destination);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Destination repository does not exist : {0} \n", destination);
+                        }
+
+                        return;
+                    }
+
+                    CopyDirectory(source, destination);
+                    if (Langue == 'F')
+                    {
+                        Console.WriteLine("Sauvegarde complète terminée.\n");
+                    }
+
+                    else
+                    {
+                        Console.WriteLine("Complete Backup Completed.\n");
+                    }
+                }
+                catch (Exception ex)
                 {
                     if (Langue == 'F')
                     {
-                        Console.WriteLine("Le dossier source n'existe pas : {0} \n", source);
+                        Console.WriteLine("Erreur lors de la sauvegarde complète : {0}\n", ex.Message);
                     }
                     else
                     {
-                        Console.WriteLine("Source repository does not exist : {0} \n", source);
+                        Console.WriteLine("Error occurred during complete backup : {0}\n", ex.Message);
                     }
-
-                    return;
                 }
 
-                if (!Directory.Exists(destination))
-                {
-                    if (Langue == 'F')
-                    {
-                        Console.WriteLine("Le dossier destination n'existe pas : {0} \n", destination);
-                    }
-                    else
-                    {
-                        Console.WriteLine("Destination repository does not exist : {0} \n", destination);
-                    }
+                int nbfichier = travailObj.CountFiles();
+                Console.WriteLine($"le nombre de fichiers est : {nbfichier}");
 
-                    return;
-                }
+                long tailleFichiers = travailObj.getSize();
+                Console.WriteLine($"La taille totale des fichiers est : {tailleFichiers} octets");
 
-                CopyDirectory(source, destination);
-                if (Langue == 'F')
-                {
-                    Console.WriteLine("Sauvegarde complète terminée.\n");
-                }
-
-                else
-                {
-                    Console.WriteLine("Complete Backup Completed.\n");
-                }
-
-                
-                travail travailObj = new travail(); 
-                TimeSpan transitionTime = new TimeSpan(); 
-                int fileSize = 0; 
-                log.Create_Log(travailObj, new FileInfo(destination), transitionTime, fileSize, "Complete");
+                TimeSpan transitionTime = new TimeSpan();
+                int fileSize = 0;
+                log.Create_Log(travailObj, new FileInfo(destination), transitionTime, fileSize, "Differential");
             }
-            catch (Exception ex)
-            {
-                if (Langue == 'F')
-                {
-                    Console.WriteLine("Erreur lors de la sauvegarde complète : {0}\n", ex.Message);
-                }
-                else
-                {
-                    Console.WriteLine("Error occurred during complete backup : {0}\n", ex.Message);
-                }
-            }
+           
 
-                    int nbfichier = travailObj.CountFiles();
-                    Console.WriteLine($"le nombre de fichiers est : {nbfichier}");
 
-                    long tailleFichiers = travailObj.getSize();
-                    Console.WriteLine($"La taille totale des fichiers est : {tailleFichiers} octets");
-             
+
         }
-
-
-
         private void CopyDirectory(string source, string destination)
         {
 
@@ -138,14 +144,15 @@ namespace LeProjet
 
                 Directory.CreateDirectory(Path.GetDirectoryName(destinationFile));
 
-                if(Langue=='F')
+                if (Langue == 'F')
                 {
                     Console.WriteLine("Copie du fichier : {0}\n", file);
-                }else 
+                }
+                else
                 {
                     Console.WriteLine("Copying File : {0}\n", file);
                 }
-                
+
                 File.Copy(file, destinationFile, true);
             }
         }
@@ -153,7 +160,8 @@ namespace LeProjet
 
         //methode pour copie differenciel
         public void SaveD(string source, string destination)
-        { StateController controller = new StateController();
+        {
+            StateController controller = new StateController();
 
 
             controller.initState();
@@ -200,10 +208,10 @@ namespace LeProjet
                         }
 
                         File.Copy(file, destinationFile, true);
-                        
-                        travail travailObj = new travail(); 
-                        TimeSpan transitionTime = new TimeSpan(); 
-                        int fileSize = 0; 
+
+                        travail travailObj = new travail();
+                        TimeSpan transitionTime = new TimeSpan();
+                        int fileSize = 0;
                         log.Create_Log(travailObj, new FileInfo(destination), transitionTime, fileSize, "Differential");
                     }
                     else
@@ -251,123 +259,123 @@ namespace LeProjet
         }
 
     }
-public class STATE
-{
-
-
-    public string type { get; set; }
-    public string name { get; set; }
-    public string sourceFilePath { get; set; }
-    public string targetFilePath { get; set; }
-    public string State { get; set; } //booleen d'état
-    public int numberOfFile { get; set; }
-    public long totalFileSize { get; set; }
-    public int numberOfFilesToDo { get; set; }
-    public string progressionState { get; set; }
-
-
-    public STATE()
+    public class STATE
     {
 
-    }
+
+        public string type { get; set; }
+        public string name { get; set; }
+        public string sourceFilePath { get; set; }
+        public string targetFilePath { get; set; }
+        public string State { get; set; } //booleen d'état
+        public int numberOfFile { get; set; }
+        public long totalFileSize { get; set; }
+        public int numberOfFilesToDo { get; set; }
+        public string progressionState { get; set; }
 
 
-
-    public STATE(string type, string name, string sourceFilePath, string targetFilePath, string State, int nbFile, long totalFileSize, int nbFilesToDo, string progressionState)
-    {
-        this.type = type;
-        this.name = name;
-        this.sourceFilePath = sourceFilePath;
-        this.targetFilePath = targetFilePath;
-        this.State = State;
-        this.numberOfFile = nbFile;
-        this.totalFileSize = totalFileSize;
-        this.numberOfFilesToDo = nbFilesToDo;
-        this.progressionState = progressionState;
-    }
-
-public int TFTC (String File)
+        public STATE()
         {
-            int tftc = File.Length; 
+
+        }
+
+
+
+        public STATE(string type, string name, string sourceFilePath, string targetFilePath, string State, int nbFile, long totalFileSize, int nbFilesToDo, string progressionState)
+        {
+            this.type = type;
+            this.name = name;
+            this.sourceFilePath = sourceFilePath;
+            this.targetFilePath = targetFilePath;
+            this.State = State;
+            this.numberOfFile = nbFile;
+            this.totalFileSize = totalFileSize;
+            this.numberOfFilesToDo = nbFilesToDo;
+            this.progressionState = progressionState;
+        }
+
+        public int TFTC(String File)
+        {
+            int tftc = File.Length;
 
             return (tftc);
         }
-        public int TFS (int a, string File) // s'implemente dans la boucle de creation de travaux le a sera a l'exterieur de la boucle et s'incrementera a chaque intenerance
+        public int TFS(int a, string File) // s'implemente dans la boucle de creation de travaux le a sera a l'exterieur de la boucle et s'incrementera a chaque intenerance
         {
             a = a + File.Length;
             return (a);
         }
 
-}
-
-
-
-
-public class StateController
-{
-    List<STATE> states;
-    public StateController()
-    {
-
-        states = new List<STATE>();
     }
-    //Return state path
-    public string pathFinder()
-    {
 
-        string pathApp = Directory.GetCurrentDirectory() + @"C:\Users\Nabilla\Desktop\States";
-        return pathApp;
 
-    }
-    // Check if state directory exists, if not create it 
-    public void initState()
+
+
+    public class StateController
     {
-        if (!Directory.Exists(pathFinder()))
+        List<STATE> states;
+
+        public StateController()
         {
-            Directory.CreateDirectory(pathFinder());
+
+            states = new List<STATE>();
         }
-    }
-    public List<STATE> AddState(string type, string name, string sourceFilePath, string targetFilePath,
-        string State, int nbFile, long totalFileSize, int nbFilesToDo, string progressionState)
-    {
-        STATE model = new STATE(type, name, sourceFilePath, targetFilePath, State, nbFile, totalFileSize, nbFilesToDo, progressionState);
-        states.Add(model);
-        return states;
-    }
 
-    public void createState()
-    {
-        lock (states)
+        // Return state path
+        public string pathFinder()
         {
-            string pathFileName = pathFinder() + @"\State.json";
-            var options = new JsonSerializerOptions { WriteIndented = true };
-            string json = JsonSerializer.Serialize(states, options);
-            File.WriteAllText(pathFileName, json);
+            string pathApp = Path.Combine(Directory.GetCurrentDirectory(), "States");
+            return pathApp;
         }
-    }
-    // Convert the json state file to a list of objects
-    public List<STATE> openState()
-    {
-        lock (states)
+
+        // Check if state directory exists, if not create it 
+        public void initState()
         {
-            string pathFileName = pathFinder() + @"\State.json";
-            using (StreamReader r = new StreamReader(pathFileName))
+            if (!Directory.Exists(pathFinder()))
             {
-                string jsonString = r.ReadToEnd();
-                var options = new JsonSerializerOptions { WriteIndented = true };
-                states = JsonSerializer.Deserialize<List<STATE>>(jsonString, options);
-                return states;
+                Directory.CreateDirectory(pathFinder());
             }
-        };
+        }
 
+        public List<STATE> AddState(string type, string name, string sourceFilePath, string targetFilePath,
+            string State, int nbFile, long totalFileSize, int nbFilesToDo, string progressionState)
+        {
+            STATE model = new STATE(type, name, sourceFilePath, targetFilePath, State, nbFile, totalFileSize, nbFilesToDo, progressionState);
+            states.Add(model);
+            return states;
+        }
+
+        public void createState()
+        {
+            lock (states)
+            {
+                string pathFileName = pathFinder() + @"\State.json";
+                var options = new System.Text.Json.JsonSerializerOptions { WriteIndented = true };
+                string json = System.Text.Json.JsonSerializer.Serialize(states, options);
+                File.WriteAllText(pathFileName, json);
+            }
+        }
+
+        // Convert the json state file to a list of objects
+        public List<STATE> openState()
+        {
+            lock (states)
+            {
+                string pathFileName = Path.Combine(pathFinder(), "State.json");
+                using (StreamReader r = new StreamReader(pathFileName))
+                {
+                    string jsonString = r.ReadToEnd();
+                    var options = new System.Text.Json.JsonSerializerOptions { WriteIndented = true };
+                    states = System.Text.Json.JsonSerializer.Deserialize<List<STATE>>(jsonString, options);
+                    return states;
+                }
+            }
+        }
     }
-
-
-}
 
     public class travail
     {
-        Main main=new Main();
+        Main main = new Main();
         public string Nom { get; set; }
         public char Type { get; set; }
         public string EmplacementSource { get; set; }
@@ -389,7 +397,7 @@ public class StateController
 
         public void AfficherDetails()
         {
-            if (main.Langue == 'F') 
+            if (main.Langue == 'F')
             {
                 Console.WriteLine($"ID: {ID}, Nom: {Nom}, Type: {Type}, EmplacementSource: {EmplacementSource}, Destination: {Destination}");
             }
@@ -398,59 +406,62 @@ public class StateController
                 Console.WriteLine($"ID: {ID}, Name: {Nom}, Type: {Type}, Source: {EmplacementSource}, Destination: {Destination}");
             }
         }
- public int CountFiles ()
-{
+        public int CountFiles()
+        {
             string[] fichiers = Directory.GetFiles(EmplacementSource);
             Console.WriteLine($"le nombre de fichiers dans le dossier {EmplacementSource}: est {fichiers.Length}");
             return fichiers.Length;
 
 
-}
-public long getSize()
-{
-    long totalSize = 0;
-
-    try
-    {
-        string[] files = Directory.GetFiles(EmplacementSource, "*.*", SearchOption.AllDirectories);
-
-        foreach (string file in files)
+        }
+        public long getSize()
         {
-            FileInfo fileInfo = new FileInfo(file);
-            totalSize += fileInfo.Length;
+            long totalSize = 0;
+
+            try
+            {
+                string[] files = Directory.GetFiles(EmplacementSource, "*.*", SearchOption.AllDirectories);
+
+                foreach (string file in files)
+                {
+                    FileInfo fileInfo = new FileInfo(file);
+                    totalSize += fileInfo.Length;
+                }
+
+                Console.WriteLine($"La taille totale des fichiers dans le dossier {EmplacementSource}: est {totalSize} octets");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur lors du calcul de la taille des fichiers : {ex.Message}");
+            }
+
+            return totalSize;
+
         }
 
-        Console.WriteLine($"La taille totale des fichiers dans le dossier {EmplacementSource}: est {totalSize} octets");
     }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Erreur lors du calcul de la taille des fichiers : {ex.Message}");
-    }
-
-    return totalSize;
-        
-    }
-        
-
-    public class LogFile
-    {
-        public static string FilePath = "D:\\Local Disk E_6420211819\\Downloads\\LOTR\\EasySaveLogs\\Log.json";
-
+        public class LogFile
+        {
+        public static string LogFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "EasySaveLogs");
+        public static string GetLogFilePath(string fileType)
+        {
+            string extension = fileType.ToUpper() == "JSON" ? ".json" : ".xml";
+            return Path.Combine(LogFolderPath, $"Log{extension}");
+        }
         public string Name { get; set; }
-        public string SourceFilePath { get; set; }
-        public string TargetFilePath { get; set; }
-        public string Size { get; set; }
-        public string Time { get; set; }
-        public string TransitionTime { get; set; }
-        public string LogType { get; set; }  
-    }
+            public string SourceFilePath { get; set; }
+            public string TargetFilePath { get; set; }
+            public string Size { get; set; }
+            public string Time { get; set; }
+            public string TransitionTime { get; set; }
+            public string LogType { get; set; }
+        }
 
     public class Log
     {
         public void Create_Log(travail work, FileInfo fileInfo, TimeSpan transitionTime, int size, string logType)
         {
             var time = new JProperty("Timestamp", DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss"));
-            var jsonDataWork = File.ReadAllText(LogFile.FilePath);
             var logEntry = new LogFile
             {
                 Name = work.Nom,
@@ -459,18 +470,31 @@ public long getSize()
                 TransitionTime = Convert.ToString(transitionTime),
                 Size = Convert.ToString(size),
                 Time = Convert.ToString(time),
-                LogType = logType  
+                LogType = logType
             };
-            var logList = JsonConvert.DeserializeObject<List<LogFile>>(jsonDataWork) ?? new List<LogFile>();
+
+            var logList = JsonConvert.DeserializeObject<List<LogFile>>(File.ReadAllText(LogFile.GetLogFilePath(logType))) ?? new List<LogFile>();
             logList.Add(logEntry);
 
-            string jsonString = JsonConvert.SerializeObject(logList, Newtonsoft.Json.Formatting.Indented);
-            File.WriteAllText(LogFile.FilePath, jsonString);
-        }
-
-        internal void Create_Log(object travailObject, FileInfo fileInfo, object transitionTime, object fileSize)
-        {
-            throw new NotImplementedException();
+            if (string.Equals(logType, "JSON", StringComparison.OrdinalIgnoreCase))
+            {
+                string jsonString = JsonConvert.SerializeObject(logList, Newtonsoft.Json.Formatting.Indented);
+                File.WriteAllText(LogFile.GetLogFilePath(logType), jsonString);
+            }
+            else if (string.Equals(logType, "XML", StringComparison.OrdinalIgnoreCase))
+            {
+                // Convertir logList en format XML et enregistrer
+                var xmlSerializer = new XmlSerializer(typeof(List<LogFile>));
+                using (var writer = new StreamWriter(LogFile.GetLogFilePath(logType).Replace(".json", ".xml")))
+                {
+                    xmlSerializer.Serialize(writer, logList);
+                }
+            }
+            else
+            {
+                throw new ArgumentException("Format de fichier non pris en charge. Utilisez 'JSON' ou 'XML'.", nameof(logType));
+            }
         }
     }
 }
+
