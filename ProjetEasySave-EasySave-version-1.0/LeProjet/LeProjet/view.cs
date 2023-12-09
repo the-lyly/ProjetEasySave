@@ -9,6 +9,45 @@ namespace LeProjet
     public class view
     {
         private char Langue;
+        public string ReadLogOutputFormat()
+        {
+            string logOutputFormat;
+
+            do
+            {
+                if (Langue == 'F')
+                {
+                    Console.WriteLine("Choisissez le format de fichier pour les logs :");
+                }else
+                {
+                    Console.WriteLine("Choose the log file format :");
+                }
+                Console.WriteLine("1. JSON");
+                Console.WriteLine("2. XML");
+                logOutputFormat = Console.ReadLine();
+            } while (logOutputFormat != "1" && logOutputFormat != "2");
+
+            return logOutputFormat == "1" ? "JSON" : "XML";
+        }
+        public string ReadInputLogFileType()
+        {
+            string logFileType;
+            do
+            {
+                if (Langue == 'F')
+                {
+                    Console.WriteLine("Choisissez le format de fichier de log :\n JSON -> pour JSON \n XML -> pour XML");
+                }
+                else
+                {
+                    Console.WriteLine("Choose the log file format :\n JSON -> for JSON \n XML -> for XML");
+                }
+
+                logFileType = Console.ReadLine().ToUpper();
+            } while (logFileType != "JSON" && logFileType != "XML");
+
+            return logFileType;
+        }
 
         public char ReadInputLangage()
         {
